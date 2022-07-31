@@ -1,1 +1,12 @@
 @import '~node_modules/modern-normalize/modern-normalize.css';
+
+ul {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.search-form {
+  padding: 10px;
+  margin: 0 auto;
+}
