@@ -22,7 +22,7 @@ function makeImageMarkup({
   
     <div class="gallery__item">
     <a href="${largeImageURL}" class="gallery__link">
-  <img src="${webformatURL}" alt="${tags}"  loading="lazy" class="gallery__image" /></a>
+  <img src="${webformatURL}" alt="${tags}"  loading="lazy" class="gallery__image" height = "300" /></a>
   <ul class="gallery__info">
     <li class="info-item">
       <p><b>Likes</b>
