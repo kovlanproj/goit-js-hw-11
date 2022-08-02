@@ -3,11 +3,13 @@ import SimpleLightbox from 'simplelightbox';
 import 'simplelightbox/dist/simple-lightbox.min.css';
 
 const form = document.querySelector('#search-form');
-const gallery = document.querySelector('.gallery');
-
-var lightbox = new SimpleLightbox('.gallery a');
+const galleryRef = document.querySelector('.gallery');
+const buttonRef = document.querySelector('.button');
+let page = 1;
+let lightbox = new SimpleLightbox('.gallery a');
 
 form.addEventListener('submit', onFormSearch);
+buttonRef.addEventListener('click', onButtonClick);
 
 function makeImageMarkup({
   largeImageURL,
@@ -49,22 +51,30 @@ function makeImageMarkup({
 
 function onFormSearch(e) {
   e.preventDefault();
+  buttonRef.classList.remove('visible');
+  page = 1;
+  galleryRef.innerHTML = '';
+  loadImages();
+  buttonRef.classList.add('visible');
+}
 
-  getPhotos(form.searchQuery.value, '1').then(images => {
-    addMarkup(gallery, images);
+function onButtonClick(e) {
+  e.preventDefault();
+  loadImages();
+}
+
+function loadImages() {
+  getPhotos(form.searchQuery.value, page).then(images => {
+    addMarkup(images);
+    page += 1;
   });
-
-  console.log(lightbox);
 }
 
 function makeGalleryMarkup(images) {
   return images.map(image => makeImageMarkup(image)).join('');
 }
 
-function addMarkup(placeRefForMarkup, galleryItems) {
-  placeRefForMarkup.insertAdjacentHTML(
-    'beforeend',
-    makeGalleryMarkup(galleryItems)
-  );
+function addMarkup(galleryItems) {
+  galleryRef.insertAdjacentHTML('beforeend', makeGalleryMarkup(galleryItems));
   lightbox.refresh();
 }
