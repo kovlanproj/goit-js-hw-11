@@ -1,4 +1,5 @@
 import { getPhotos } from './js/pixabayapi';
+import { Notify } from 'notiflix/build/notiflix-notify-aio';
 import SimpleLightbox from 'simplelightbox';
 import 'simplelightbox/dist/simple-lightbox.min.css';
 
@@ -51,6 +52,10 @@ function makeImageMarkup({
 
 function onFormSearch(e) {
   e.preventDefault();
+  if (form.searchQuery.value === '') {
+    Notify.failure('You have to fill in search query!');
+    return;
+  }
   buttonRef.classList.remove('visible');
   page = 1;
   galleryRef.innerHTML = '';
@@ -64,9 +69,21 @@ function onButtonClick(e) {
 }
 
 function loadImages() {
-  getPhotos(form.searchQuery.value, page).then(images => {
-    addMarkup(images);
-    page += 1;
+  getPhotos(form.searchQuery.value, page).then(response => {
+    console.log(response.hits);
+    if (response.totalHits === 0) {
+      Notify.failure(
+        'Sorry, there are no images matching your search query. Please try again.'
+      );
+    } else {
+      if (page === 1) {
+        Notify.info(
+          `Hooray! We found ${response.total} images, but you will see only ${response.totalHits} images )`
+        );
+      }
+      addMarkup(response.hits);
+      page += 1;
+    }
   });
 }
 
