@@ -53,7 +53,7 @@ function makeImageMarkup({
 function onFormSearch(e) {
   e.preventDefault();
   if (form.searchQuery.value === '') {
-    Notify.failure('You have to fill in search query!');
+    Notify.failure('You have to fill in a search query!');
     return;
   }
   buttonRef.classList.remove('visible');
