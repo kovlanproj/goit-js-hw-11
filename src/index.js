@@ -1,16 +1,29 @@
-import { getPhotos } from './js/pixabayapi';
 import { Notify } from 'notiflix/build/notiflix-notify-aio';
 import SimpleLightbox from 'simplelightbox';
 import 'simplelightbox/dist/simple-lightbox.min.css';
+import ImagesApiService from './js/image-service';
 
-const form = document.querySelector('#search-form');
-const galleryRef = document.querySelector('.gallery');
-const buttonRef = document.querySelector('.button');
-let page = 1;
+const imagesApiService = new ImagesApiService();
 let lightbox = new SimpleLightbox('.gallery a');
 
-form.addEventListener('submit', onFormSearch);
-buttonRef.addEventListener('click', onButtonClick);
+const refs = {
+  form: document.querySelector('#search-form'),
+  gallery: document.querySelector('.gallery'),
+  moreButton: document.querySelector('.load-more'),
+};
+
+refs.form.addEventListener('submit', onFormSearch);
+refs.moreButton.addEventListener('click', onButtonClick);
+
+function smoothScroll() {
+  const { height: cardHeight } =
+    refs.gallery.firstElementChild.getBoundingClientRect();
+  console.log('heu=ight', cardHeight);
+  window.scrollBy({
+    top: cardHeight * 2,
+    behavior: 'smooth',
+  });
+}
 
 function makeImageMarkup({
   largeImageURL,
@@ -52,35 +65,58 @@ function makeImageMarkup({
 
 function onFormSearch(e) {
   e.preventDefault();
-  if (form.searchQuery.value === '') {
-    Notify.failure('You have to fill in search query!');
-    return;
+  hideMoreButton();
+  imagesApiService.query = e.currentTarget.elements.searchQuery.value;
+  if (imagesApiService.query === '') {
+    return Notify.failure('You have to fill in a search query!');
   }
-  buttonRef.classList.remove('visible');
-  page = 1;
-  galleryRef.innerHTML = '';
-  loadAndRenderImages();
-  buttonRef.classList.add('visible');
+
+  imagesApiService.resetPage();
+  clearImages();
+
+  loadAndRenderImages(e.target);
+}
+
+function clearImages() {
+  refs.gallery.innerHTML = '';
+}
+
+function showMoreButton() {
+  refs.moreButton.parentNode.classList.add('visible');
+}
+
+function hideMoreButton() {
+  refs.moreButton.parentNode.classList.remove('visible');
 }
 
 function onButtonClick(e) {
   e.preventDefault();
-  loadAndRenderImages();
+
+  loadAndRenderImages(e.target);
 }
 
-async function loadAndRenderImages() {
+async function loadAndRenderImages(ref) {
   try {
-    const setOfImages = await getPhotos(form.searchQuery.value, page);
+    const setOfImages = await imagesApiService.fetchImages();
+
     renderImages(setOfImages);
+    console.log(ref);
+    if (ref === refs.moreButton) {
+      smoothScroll();
+    }
+    if (ref === refs.form) {
+      showMoreButton();
+    }
+
+    // console.log(e.currentTarget);
   } catch (error) {
     console.log(error);
   }
 }
 
 async function renderImages(setOfImages) {
-  console.log(page * 40);
-  if (page * 40 > setOfImages.totalHits) {
-    buttonRef.classList.remove('visible');
+  if (imagesApiService.page * 40 > setOfImages.totalHits) {
+    refs.moreButton.classList.remove('visible');
     Notify.failure(
       "We're sorry, but you've reached the end of search results."
     );
@@ -91,13 +127,14 @@ async function renderImages(setOfImages) {
       'Sorry, there are no images matching your search query. Please try again.'
     );
   } else {
-    if (page === 1) {
+    if (imagesApiService.page === 1) {
       Notify.info(
         `Hooray! We found ${setOfImages.total} images, but you will see only ${setOfImages.totalHits} images )`
       );
     }
     addMarkup(setOfImages.hits);
-    page += 1;
+
+    imagesApiService.incrementPage();
   }
 }
 
@@ -106,6 +143,7 @@ function makeGalleryMarkup(images) {
 }
 
 function addMarkup(galleryItems) {
-  galleryRef.insertAdjacentHTML('beforeend', makeGalleryMarkup(galleryItems));
+  refs.gallery.insertAdjacentHTML('beforeend', makeGalleryMarkup(galleryItems));
+  // smoothScroll();
   lightbox.refresh();
 }
