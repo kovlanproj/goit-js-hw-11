@@ -18,7 +18,7 @@ refs.moreButton.addEventListener('click', onButtonClick);
 function smoothScroll() {
   const { height: cardHeight } =
     refs.gallery.firstElementChild.getBoundingClientRect();
-  console.log('heu=ight', cardHeight);
+
   window.scrollBy({
     top: cardHeight * 2,
     behavior: 'smooth',
@@ -100,15 +100,13 @@ async function loadAndRenderImages(ref) {
     const setOfImages = await imagesApiService.fetchImages();
 
     renderImages(setOfImages);
-    console.log(ref);
+
     if (ref === refs.moreButton) {
       smoothScroll();
     }
     if (ref === refs.form) {
       showMoreButton();
     }
-
-    // console.log(e.currentTarget);
   } catch (error) {
     console.log(error);
   }
@@ -144,6 +142,6 @@ function makeGalleryMarkup(images) {
 
 function addMarkup(galleryItems) {
   refs.gallery.insertAdjacentHTML('beforeend', makeGalleryMarkup(galleryItems));
-  // smoothScroll();
+
   lightbox.refresh();
 }
