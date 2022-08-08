@@ -127,7 +127,7 @@ function renderImages(setOfImages) {
     );
   } else {
     if (imagesApiService.page === 1) {
-      if (setOfImages.totalHits <= 500) {
+      if (setOfImages.total <= 500) {
         Notify.info(`Hooray! We found ${setOfImages.totalHits} images! )`);
       } else {
         Notify.info(
