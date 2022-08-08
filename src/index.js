@@ -99,25 +99,26 @@ async function loadAndRenderImages(ref) {
   try {
     const setOfImages = await imagesApiService.fetchImages();
 
-    renderImages(setOfImages);
-
     if (ref === refs.moreButton) {
       smoothScroll();
     }
     if (ref === refs.form) {
       showMoreButton();
     }
+    renderImages(setOfImages);
   } catch (error) {
     console.log(error);
   }
 }
 
-async function renderImages(setOfImages) {
+function renderImages(setOfImages) {
   if (imagesApiService.page * 40 > setOfImages.totalHits) {
-    refs.moreButton.classList.remove('visible');
-    Notify.failure(
-      "We're sorry, but you've reached the end of search results."
-    );
+    hideMoreButton();
+    if (imagesApiService.page !== 1) {
+      Notify.failure(
+        "We're sorry, but you've reached the end of search results."
+      );
+    }
   }
 
   if (setOfImages.totalHits === 0) {
@@ -126,9 +127,13 @@ async function renderImages(setOfImages) {
     );
   } else {
     if (imagesApiService.page === 1) {
-      Notify.info(
-        `Hooray! We found ${setOfImages.total} images, but you will see only ${setOfImages.totalHits} images )`
-      );
+      if (setOfImages.totalHits <= 500) {
+        Notify.info(`Hooray! We found ${setOfImages.totalHits} images! )`);
+      } else {
+        Notify.info(
+          `Hooray! We found ${setOfImages.total} images, but you will see only ${setOfImages.totalHits} images )`
+        );
+      }
     }
     addMarkup(setOfImages.hits);
 
